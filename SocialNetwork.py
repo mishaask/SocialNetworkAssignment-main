@@ -78,7 +78,6 @@ class User:  # Observer design pattern
             self.following.append(user)
             user.followers.append(self)
             print(f"{self.username} started following {user.username}")
-            #  user.notify(f"{user.username} has started following {self.username}")
         else:
             raise Exception("you are not logged in")
 
@@ -105,7 +104,7 @@ class User:  # Observer design pattern
                 return postFactory.createSalesPost(self, *args)
 
     def print_notifications(self):
-        print(f"{self.username}'s notifications")
+        print(f"{self.username}'s notifications:")
         for notif in self.notifications:
             print(notif)
 
@@ -128,39 +127,41 @@ class Post:  # Factory design pattern
             self.location = location
             self.Sold = False
 
+        self.poster.posts.append(self)
         for follower in self.poster.followers:
             follower.notify(f"{self.poster.username} has a new post")
         print(self)
 
     def __str__(self):
         if self.postTag == 1:
-            return f"{self.poster.username} published a post:\n"+f"{self.data}"
+            return f'{self.poster.username} published a post:\n'+f'"{self.data}"\n'
 
         if self.postTag == 2:
-            return f"{self.poster.username} posted a picture"
+            return f"{self.poster.username} posted a picture\n"
 
         if self.postTag == 3:
             first_part = f"{self.poster.username} posted a product for sale:\n"
             if not self.Sold:
-                return first_part + f"For sale! {self.carName}, price: {self.price}, pickup from: {self.location}"
+                return first_part + f"For sale! {self.carName}, price: {self.price}, pickup from: {self.location}\n"
             else:
-                return first_part + f"Sold! {self.carName}, price: {self.price}, pickup from: {self.location}"
+                return first_part + f"Sold! {self.carName}, price: {self.price}, pickup from: {self.location}\n"
 
     def like(self, user):
-        self.Likes += 1
-        self.poster.notify(f"{user.username} liked your post")
-        # self.notify(elements)
+        if self.poster is not user:
+            self.Likes += 1
+            notification = f"{user.username} liked your post"
+            print(f"notification to {self.poster.username}: "+notification)
+            self.poster.notify(notification)
+        #  else:
+        #    raise Exception("You can't like yourself")
 
-    #  def dislike(self, user):
-        # self.Likes += 1
-        # user.notify(elements)
-        # self.notify(elements)
 
     def comment(self, user, text):
         comment = Comment(user.username, text)
         self.comments.append(comment)
-        self.poster.notify(f"{user.username} commented on your post")
-        # self.notify(elements)
+        notification = f"{user.username} commented on your post"
+        print(f"notification to {self.poster.username}: "+notification+f": {comment.text}")
+        self.poster.notify(notification)
 
     def display(self):
         if self.postTag == 2:
